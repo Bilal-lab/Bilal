@@ -1,0 +1,26 @@
+#必要関数input
+import ephem
+import datetime
+import numpy as np
+
+#ishikawaを観測地点とし、緯度、軽度と現在時刻を設定
+ishikawa = ephem.Observer()
+ishikawa.lat = '36.5944'
+ishikawa.lon = '136.62556'
+ishikawa.date = datetime.datetime.utcnow()
+
+#目標とする人工衛星(iss)のTLEを設定
+iss = ephem.readtle('ISS',
+                    '1 25544U 98067A   19251.51298924  .00000370  00000-0  14350-4 0  9995',
+                    '2 25544  51.6453 307.9614 0007973  18.9504 129.2301 15.50436909188185')
+
+#ishikawaおける時刻と迎角を計算
+iss.compute(ishikawa)
+
+#地平線で見えない場合を排除
+rise_t, az_rise, max_t, alt_max, set_t, az_set = ishikawa.next_pass(iss)
+
+#結果をoutput
+print(u"見え始め時刻: %s 方位角: %.1f" % (ephem.localtime(rise_t), np.rad2deg(az_rise)))
+print(u"最大迎角時刻: %s 最大迎角: %.1f" % (ephem.localtime(max_t), np.rad2deg(alt_max)))
+print(u"見え終わり時刻: %s 方位角: %.1f" % (ephem.localtime(set_t), np.rad2deg(az_set)))
